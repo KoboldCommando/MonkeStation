@@ -153,41 +153,65 @@
 	return TRUE
 
 /datum/reagent/alchemy/snakeoil
-	name = "Snake Oil"
+	name = "Snake Oil" //alternate name: slugfest
 	description = "Allows you to crawl faster on your belly like a snake!  But makes you worse at walking... like a snake."
 	reagent_state = LIQUID
 	color = "#3f8339"
 	overdose_threshold = 20
 	metabolization_rate = 0.75 * REAGENTS_METABOLISM
 
+/datum/reagent/alchemy/snakeoil/on_mob_metabolize(mob/living/L)
+	RegisterSignal(L, list(COMSIG_MOVABLE_MOVED), .proc/speedchange)
+
 /datum/reagent/alchemy/snakeoil/on_mob_end_metabolize(mob/living/L)
 	L.remove_movespeed_modifier(type)
 	..()
 
 /datum/reagent/alchemy/snakeoil/on_mob_life(mob/living/carbon/M)
-	var/high_message = pick("You feel like crawling.", "Your belly wiggles rhythmically.", "You feel like your legs are unecessary.")
+	var/high_message = pick("You feel like being closer to the ground.", "Your belly undulates strangely.", "Your legs feel weak and vestigial.")
 	if(prob(5))
 		to_chat(M, "<span class='notice'>[high_message]</span>")
-	M.adjustOrganLoss(ORGAN_SLOT_BRAIN, 1)
+	M.adjustOrganLoss(ORGAN_SLOT_BRAIN, 0.5)
 	if(prob(5))
-		M.emote(pick("twitch", "shiver"))
-	if(!(M.mobility_flags & MOBILITY_STAND))
-		M.add_movespeed_modifier(type, update=TRUE, priority=100, multiplicative_slowdown=-4, blacklisted_movetypes=(FLYING|FLOATING))
-	else
-		M.remove_movespeed_modifier(type)
+		M.emote(pick("twitch", "slither"))
 	..()
 	. = 1
 
+/datum/reagent/alchemy/snakeoil/proc/speedchange(mob/living/carbon/M)
+	SIGNAL_HANDLER
+
+	if(!(M.mobility_flags & MOBILITY_STAND))
+		M.add_movespeed_modifier(type, update=TRUE, priority=100, override=TRUE, multiplicative_slowdown=-4, movetypes = GROUND)
+	else
+		M.add_movespeed_modifier(type, update=TRUE, priority=100, override=TRUE, multiplicative_slowdown=4, movetypes = GROUND)
+
+
 /datum/reagent/alchemy/snakeoil/overdose_process(mob/living/M)
-	if((M.mobility_flags & MOBILITY_MOVE) && !ismovableatom(M.loc))
-		for(var/i in 1 to 4)
-			step(M, pick(GLOB.cardinals))
-	if(prob(20))
-		M.emote("hisses")
 	if(prob(33))
-		M.visible_message("<span class='danger'>[M]'s hands flip out and flail everywhere!</span>")
-		M.drop_all_held_items()
+		M.visible_message("<span class='danger'>[M]'s legs visibly shirivel and atrophy!</span>")
+		M.apply_damage(damage = 2,damagetype = BRUTE, def_zone = BODY_ZONE_L_LEG, blocked = FALSE, forced = FALSE)
+		M.apply_damage(damage = 2,damagetype = BRUTE, def_zone = BODY_ZONE_R_LEG, blocked = FALSE, forced = FALSE)
+		M.adjustCloneLoss(0.5, updating_health = TRUE, forced = FALSE)
 	..()
-	M.adjustToxLoss(1, 0)
-	M.adjustOrganLoss(ORGAN_SLOT_BRAIN, pick(0.5, 0.6, 0.7, 0.8, 0.9, 1))
 	. = 1
+
+/datum/reagent/alchemy/recurzine
+	name = "Recurzine"
+	description = "Shortly after metabolizing, isolates and stores a portion of all other chemicals in the bloodstream. When it exits the system, these stored chemicals return."
+	reagent_state = LIQUID
+	color = "#8502ff"
+	metabolization_rate = 0.4 * REAGENTS_METABOLISM
+	var/datum/reagents/storedreagents = new/datum/reagents
+	var/storeamount
+
+/datum/reagent/alchemy/recurzine/on_mob_metabolize(mob/living/L)
+	storeamount = L.reagents.get_reagent_amount(/datum/reagent/alchemy/recurzine) / 4
+	for(var/datum/reagent/R in L.reagents.reagent_list)
+		if(R)
+			if(R.type != /datum/reagent/alchemy/recurzine) //no actual recursion, sorry
+				L.reagents.trans_id_to(src, R.type, storeamount)
+
+/datum/reagent/alchemy/recurzine/on_mob_end_metabolize(mob/living/L)
+	if(storedreagents.reagent_list)
+		storedreagents.trans_to(L, storedreagents.total_volume)
+	..()

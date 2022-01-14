@@ -30,3 +30,9 @@
 	id = /datum/reagent/alchemy/snakeoil
 	results = list(/datum/reagent/alchemy/snakeoil = 10)
 	required_reagents = list(/datum/reagent/alchemy/fortis = 5, /datum/reagent/water = 5)
+
+/datum/chemical_reaction/recurzine
+	name = "Recurzine"
+	id = /datum/reagent/alchemy/recurzine
+	results = list(/datum/reagent/alchemy/recurzine = 10)
+	required_reagents = list(/datum/reagent/alchemy/regia = 5, /datum/reagent/water = 5)
