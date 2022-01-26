@@ -40,7 +40,6 @@
 #define THERMAL		/datum/mutation/human/thermal
 #define ANTENNA		/datum/mutation/human/antenna
 #define PARANOIA	/datum/mutation/human/paranoia
-#define MINDREAD	/datum/mutation/human/mindreader
 #define INSULATED	/datum/mutation/human/insulated
 #define SHOCKTOUCH	/datum/mutation/human/shock
 #define OLFACTION	/datum/mutation/human/olfaction
@@ -152,6 +151,8 @@
 #define ORGAN_SLOT_BRAIN_ANTISTUN "brain_antistun"
 #define ORGAN_SLOT_TAIL "tail"
 #define ORGAN_SLOT_WINGS "wings"
+//MonkeStation Edit: Butt Organ
+#define ORGAN_SLOT_BUTT "butt"
 
 //organ defines
 #define STANDARD_ORGAN_THRESHOLD 	100
