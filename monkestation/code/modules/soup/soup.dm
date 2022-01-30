@@ -1,44 +1,31 @@
 /obj/item/soup_pot
-	name = "\improper Soup Pot"
+	name = "soup Pot"
 	desc = "placeholder"
 	icon = 'icons/obj/kitchen.dmi'
 	icon_state = "juicer1"
 	resistance_flags = ACID_PROOF
 	var/operating = FALSE
-	var/obj/item/reagent_containers/beaker = null
-	var/obj/item/reagent_containers/soupholder = null
-	var/limit = 10
+	var/datum/reagents/soupholder = new/datum/reagents(300)
+	var/maxbroth = 100 //maximum amount of precooked broth
 	var/list/holdingitems
+	var/limit = 10
+	var/readytoserve = FALSE
 	var/static/list/typecache_to_take
-
-	var/static/radial_examine = image(icon = 'icons/mob/radial.dmi', icon_state = "radial_examine")
-	var/static/radial_eject = image(icon = 'icons/mob/radial.dmi', icon_state = "radial_eject")
-	var/static/radial_mix = image(icon = 'icons/mob/radial.dmi', icon_state = "radial_mix")
+	var/static/radial_serve = image(icon = 'monkestation/icons/mob/soup.dmi', icon_state = "serve")
+	var/static/radial_cook = image(icon = 'monkestation/icons/mob/soup.dmi', icon_state = "cook")
+	var/static/radial_empty = image(icon = 'monkestation/icons/mob/soup.dmi', icon_state = "empty")
 
 
 /obj/item/soup_pot/Initialize()
 	. = ..()
-	if(!typecache_to_take)
-		typecache_to_take = typecacheof(/obj/item/reagent_containers/food/snacks/grown)
 	holdingitems = list()
-	beaker = new /obj/item/reagent_containers/glass/beaker/large(src)
-	soupholder = new /obj/item/reagent_containers/glass/beaker/bluespace(src)
 
 /obj/item/soup_pot/Destroy()
-	beaker = null
 	soupholder = null
 	drop_all_items()
 	return ..()
 
 /obj/item/soup_pot/contents_explosion(severity, target)
-	if(beaker)
-		switch(severity)
-			if(EXPLODE_DEVASTATE)
-				SSexplosions.high_mov_atom += beaker
-			if(EXPLODE_HEAVY)
-				SSexplosions.med_mov_atom += beaker
-			if(EXPLODE_LIGHT)
-				SSexplosions.low_mov_atom += beaker
 	if(soupholder)
 		switch(severity)
 			if(EXPLODE_DEVASTATE)
@@ -58,22 +45,24 @@
 		. += "<span class='warning'>\The [src] is boiling!</span>"
 		return
 
-	if(beaker || length(holdingitems))
+	if(readytoserve)
+		if(soupholder.total_volume)
+			. += "<span class='notice'>- [soupholder.total_volume] units of delicious steaming soup!</span>"
+
+	if(soupholder || length(holdingitems))
 		. += "<span class='notice'>\The [src] contains:</span>"
 		for(var/i in holdingitems)
 			var/obj/item/O = i
 			. += "<span class='notice'>- \A [O.name].</span>"
-		for(var/datum/reagent/R in beaker.reagents.reagent_list)
+		for(var/datum/reagent/R in soupholder.reagent_list)
 			. += "<span class='notice'>- [R.volume] units of [R.name].</span>"
-		if(soupholder.reagents.total_volume)
-			. += "<span class='notice'>- [soupholder.reagents.total_volume] units of delicious steaming soup!</span>"
-		if(!holdingitems.len && !beaker.reagents.total_volume && !soupholder.reagents.total_volume)
+		if(!holdingitems.len && !soupholder.total_volume && !soupholder.total_volume)
 			. += "<span class='notice'>- nothing!</span>"
 
 /obj/item/soup_pot/handle_atom_del(atom/A)
 	. = ..()
-	if(A == beaker)
-		beaker = null
+	if(A == soupholder)
+		soupholder = null
 		update_icon()
 	if(holdingitems[A])
 		holdingitems -= A
@@ -85,7 +74,7 @@
 	holdingitems = list()
 
 /obj/item/soup_pot/update_icon()
-	if(beaker)
+	if(soupholder)
 		icon_state = "juicer1"
 	else
 		icon_state = "juicer0"
@@ -98,11 +87,11 @@
 			to_chat(user, "<span class='warning'>[J] is empty!</span>")
 			return
 
-		if(beaker.reagents.holder_full())
+		if(soupholder.total_volume >= src.maxbroth)
 			to_chat(user, "<span class='warning'>[src] is full.</span>")
 			return
 
-		var/trans = J.reagents.trans_to(src.beaker, J.amount_per_transfer_from_this, transfered_by = user)
+		var/trans = J.reagents.trans_to(src.soupholder, J.amount_per_transfer_from_this, transfered_by = user)
 		to_chat(user, "<span class='notice'>You fill [src] with [trans] unit\s of the contents of [J].</span>")
 
 	else if(holdingitems.len >= limit)
@@ -114,27 +103,6 @@
 		holdingitems[I] = TRUE
 		return FALSE
 
-/*
-	if(holdingitems.len >= limit)
-		to_chat(user, "<span class='warning'>[src] is filled to capacity!</span>")
-		return TRUE
-
-	if(!I.grind_results && !I.juice_results)
-		if(user.a_intent == INTENT_HARM)
-			return ..()
-		else
-			to_chat(user, "<span class='warning'>You cannot grind [I] into reagents!</span>")
-			return TRUE
-
-	if(!I.grind_requirements(src)) //Error messages should be in the objects' definitions
-		return
-
-	if(user.transferItemToLoc(I, src))
-		to_chat(user, "<span class='notice'>You add [I] to [src].</span>")
-		holdingitems[I] = TRUE
-		return FALSE
-		*/
-
 /obj/item/soup_pot/proc/check_menu(mob/living/user)
 	if(!istype(user))
 		return FALSE
@@ -143,46 +111,50 @@
 	return TRUE
 
 /obj/item/soup_pot/attack_self(mob/user)
-	var/list/choices = list(
-		"Eject" = image(icon = 'icons/mob/radial.dmi', icon_state = "radial_eject"),
-		"Cook" = image(icon = 'icons/mob/radial.dmi', icon_state = "radial_mix")
-	)
+	var/list/choices = list("Empty" = image(icon = 'monkestation/icons/mob/soup.dmi', icon_state = "empty"))
+
+	if(readytoserve)
+		choices.Add("Serve" = image(icon = 'monkestation/icons/mob/soup.dmi', icon_state = "serve"))
+	else
+		choices.Add("Cook" = image(icon = 'monkestation/icons/mob/soup.dmi', icon_state = "cook"))
 
 	var/choice = show_radial_menu(user, src, choices, custom_check = CALLBACK(src, .proc/check_menu, user), require_near = TRUE, tooltips = TRUE)
 	if(!check_menu(user))
 		return
 	switch(choice)
-		if("Eject")
-			eject(user)
+		if("Empty")
+			empty(user)
 			return
 		if("Cook")
 			cook(user)
 			return
+		if("Serve")
+			serve(user)
+			return
 
-/obj/item/soup_pot/proc/eject(mob/user)
+/obj/item/soup_pot/proc/empty(mob/user)
 	for(var/i in holdingitems)
 		to_chat(user, "<span class='notice'>The ingredients tumble out of the pot!</span>")
 		var/obj/item/O = i
 		O.forceMove(drop_location())
 		holdingitems -= O
-	if(beaker.reagents.total_volume || soupholder.reagents.total_volume)
+	if(soupholder.total_volume)
 		to_chat(user, "<span class='notice'>The soup vaporizes into a harmless steam!</span>")
 		playsound(src, 'sound/weapons/sear.ogg', 50, 0)
 		playsound(src, 'sound/items/cig_snuff.ogg', 50, 0)
-		beaker = new /obj/item/reagent_containers/glass/beaker/large(src)
-		soupholder = new /obj/item/reagent_containers/glass/beaker/bluespace(src)
+		soupholder = new/datum/reagents
 		var/datum/effect_system/steam_spread/steam = new /datum/effect_system/steam_spread()
 		steam.set_up(10, 0, get_turf(src))
 		steam.start()
+	readytoserve = FALSE
 
 /obj/item/soup_pot/proc/cook(mob/user)
-	if(beaker.reagents.total_volume)
+	if(soupholder.total_volume)
 		to_chat(user, "<span class='notice'>The pot begins energetically boiling the contents into soup!</span>")
 		operating = TRUE
 		icon_state = "juicer0"
 		playsound(src, 'sound/machines/terminal_on.ogg', 50, 1)
 		playsound(src, 'sound/effects/bubbles2.ogg', 50, 1)
-		src.beaker.reagents.trans_to(src.soupholder, 100, transfered_by = user)
 		processitems(user)
 		addtimer(CALLBACK(src, .proc/stop_operating), 60)
 	else if(operating)
@@ -192,21 +164,27 @@
 
 /obj/item/soup_pot/proc/stop_operating()
 	operating = FALSE
+	readytoserve = TRUE
 	icon_state = "juicer1"
 	playsound(src, 'sound/machines/ding.ogg', 50, 1)
 
+/obj/item/soup_pot/proc/serve(mob/user)
+	//create a bowl of soup containing 30u of the soup
+	//put it in the user's hands or on the ground
+	//if we're empty then make us no longer ready to serve
+
 /obj/item/soup_pot/proc/processitems(mob/user)
 	for(var/i in holdingitems)
-		if(soupholder.reagents.total_volume >= soupholder.reagents.maximum_volume)
+		if(soupholder.total_volume >= soupholder.maximum_volume)
 			break
 		var/obj/item/I = i
 		var/souped = FALSE
 		check_trash(I)
 		if(I.grind_results)
-			soupholder.reagents.add_reagent_list(I.grind_results)
+			soupholder.add_reagent_list(I.grind_results)
 			souped = TRUE
 		if(I.juice_results)
-			soupholder.reagents.add_reagent_list(I.juice_results)
+			soupholder.add_reagent_list(I.juice_results)
 			souped = TRUE
 		if(I.reagents)
 			I.reagents.trans_to(soupholder, I.reagents.total_volume, transfered_by = user)
