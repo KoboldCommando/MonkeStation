@@ -610,7 +610,7 @@ CIGARETTE PACKETS ARE IN FANCY.DM
 		attack_verb = list("burnt", "singed")
 		START_PROCESSING(SSobj, src)
 	else
-		hitsound = "swing_hit"
+		hitsound = 'sound/weapons/tap.ogg' //monkestation edit
 		force = 0
 		attack_verb = null //human_defense.dm takes care of it
 		STOP_PROCESSING(SSobj, src)

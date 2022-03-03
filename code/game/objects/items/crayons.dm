@@ -579,7 +579,7 @@
 	item_state = "spraycan"
 	lefthand_file = 'icons/mob/inhands/equipment/hydroponics_lefthand.dmi'
 	righthand_file = 'icons/mob/inhands/equipment/hydroponics_righthand.dmi'
-	desc = "A metallic container containing tasty paint."
+	desc = "A metallic container containing tasty paint. Has a label warning about flammable propellant." //monkestation edit
 
 	instant = TRUE
 	edible = FALSE
