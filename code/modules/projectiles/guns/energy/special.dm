@@ -144,7 +144,7 @@
 
 	heat = 3800
 	usesound = list('sound/items/welder.ogg', 'sound/items/welder2.ogg')
-	tool_behaviour = TOOL_WELDER
+	tool_behaviour = TOOL_WELDER & TOOL_SAW //monkestation edit
 	toolspeed = 0.7 //plasmacutters can be used as welders, and are faster than standard welders
 	var/progress_flash_divisor = 10  //copypasta is best pasta
 	var/light_intensity = 1
