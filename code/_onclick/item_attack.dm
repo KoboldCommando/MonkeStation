@@ -13,6 +13,12 @@
 				afterattack(user, user, 1, params)
 			else
 				afterattack(target, user, 1, params)
+	//Adjacent
+	SSdemo.mark_dirty(src)
+	if(isturf(target))
+		SSdemo.mark_turf(target)
+	else
+		SSdemo.mark_dirty(target)
 
 
 //Checks if the item can work as a tool, calling the appropriate tool behavior on the target
@@ -28,6 +34,7 @@
 	if(SEND_SIGNAL(src, COMSIG_ITEM_ATTACK_SELF, user) & COMPONENT_NO_INTERACT)
 		return
 	interact(user)
+	SSdemo.mark_dirty(src)
 
 /obj/item/proc/pre_attack(atom/A, mob/living/user, params) //do stuff before attackby!
 	if(SEND_SIGNAL(src, COMSIG_ITEM_PRE_ATTACK, A, user, params) & COMPONENT_NO_ATTACK)

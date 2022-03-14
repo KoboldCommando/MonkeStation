@@ -151,8 +151,10 @@
 #define INIT_ORDER_SHUTTLE			-21
 #define INIT_ORDER_MINOR_MAPPING	-40
 #define INIT_ORDER_PATH				-50
+#define INIT_ORDER_DISCORD			-60
 #define INIT_ORDER_EXPLOSIONS		-69
-#define INIT_ORDER_CHAT				-150 //Should be last to ensure chat remains smooth during init.
+#define INIT_ORDER_DEMO				-99 // To avoid a bunch of changes related to initialization being written, do this last
+#define INIT_ORDER_CHAT				-100 //Should be last to ensure chat remains smooth during init.
 
 // Subsystem fire priority, from lowest to highest priority
 // If the subsystem isn't listed here it's either DEFAULT or PROCESS (if it's a processing subsystem child)
@@ -251,6 +253,8 @@
 			}\
 		}\
 		A.flags_1 &= ~OVERLAY_QUEUED_1;\
+		if(isturf(A)){SSdemo.mark_turf(A);}\
+		if(isobj(A) || ismob(A)){SSdemo.mark_dirty(A);}\
 	}
 
 /**

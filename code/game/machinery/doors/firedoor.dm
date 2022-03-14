@@ -275,6 +275,7 @@
 		icon_state = "door_open"
 		if(welded)
 			add_overlay("welded_open")
+	SSdemo.mark_dirty(src)
 
 /obj/machinery/door/firedoor/open()
 	if(density && !operating) //This is hacky but gets the sound to play on time.

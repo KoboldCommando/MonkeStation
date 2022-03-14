@@ -468,6 +468,7 @@
 
 	SEND_SIGNAL(src, COMSIG_MOVABLE_MOVED, OldLoc, Dir, Forced)
 
+	SSdemo.mark_dirty(src)
 	return TRUE
 
 /atom/movable/Destroy(force)
