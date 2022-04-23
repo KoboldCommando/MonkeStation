@@ -173,3 +173,107 @@
 		return 0
 	return 1
 
+/turf/open/floor/plating/hinged
+var/opened = FALSE
+var/is_animating_door = FALSE
+var/icon_door = null
+var/icon_door_override = FALSE
+var/obj/effect/overlay/closet_door/door_obj
+var/door_anim_squish = 0.30
+var/door_anim_angle = 136
+var/door_hinge = -6.5
+var/door_anim_time = 2.0
+var/open_sound = 'sound/machines/closet_open.ogg'
+var/close_sound = 'sound/machines/closet_close.ogg'
+var/open_sound_volume = 35
+var/close_sound_volume = 50
+
+/turf/open/floor/plating/hinged/update_icon()
+	if(istype(src, /obj/structure/closet/supplypod))
+		return ..()
+	cut_overlays()
+	if(!opened)
+		layer = OBJ_LAYER
+		if(!is_animating_door)
+			if(icon_door)
+				add_overlay("[icon_door]")
+			else
+				add_overlay("[icon_state]")
+
+	else
+		layer = BELOW_OBJ_LAYER
+		if(!is_animating_door)
+			if(icon_door_override)
+				add_overlay("[icon_door]_open")
+			else
+				add_overlay("[icon_state]_open")
+
+/turf/open/floor/plating/hinged/proc/animate_door(var/closing = FALSE)
+	if(!door_anim_time)
+		return
+	if(!door_obj) door_obj = new
+	vis_contents |= door_obj
+	door_obj.icon = icon
+	door_obj.icon_state = "[icon_door || icon_state]_door"
+	is_animating_door = TRUE
+	var/num_steps = door_anim_time / world.tick_lag
+	for(var/I in 0 to num_steps)
+		var/angle = door_anim_angle * (closing ? 1 - (I/num_steps) : (I/num_steps))
+		var/matrix/M = get_door_transform(angle)
+		var/door_state = angle >= 90 ? "[icon_door_override ? icon_door : icon_state]_back" : "[icon_door || icon_state]_door"
+		var/door_layer = angle >= 90 ? FLOAT_LAYER : ABOVE_MOB_LAYER
+
+		if(I == 0)
+			door_obj.transform = M
+			door_obj.icon_state = door_state
+			door_obj.layer = door_layer
+		else if(I == 1)
+			animate(door_obj, transform = M, icon_state = door_state, layer = door_layer, time = world.tick_lag, flags = ANIMATION_END_NOW)
+		else
+			animate(transform = M, icon_state = door_state, layer = door_layer, time = world.tick_lag)
+	addtimer(CALLBACK(src,.proc/end_door_animation),door_anim_time,TIMER_UNIQUE|TIMER_OVERRIDE)
+
+/turf/open/floor/plating/hinged/proc/end_door_animation()
+	is_animating_door = FALSE
+	vis_contents -= door_obj
+	update_icon()
+	COMPILE_OVERLAYS(src)
+
+/turf/open/floor/plating/hinged/proc/get_door_transform(angle)
+	var/matrix/M = matrix()
+	M.Translate(-door_hinge, 0)
+	M.Multiply(matrix(cos(angle), 0, 0, -sin(angle) * door_anim_squish, 1, 0))
+	M.Translate(door_hinge, 0)
+	return M
+
+/turf/open/floor/plating/hinged/attack_hand(mob/living/user)
+	. = ..()
+	if(.)
+		return
+	if(!(user.mobility_flags & MOBILITY_STAND) && get_dist(src, user) > 0)
+		return
+	toggle(user)
+
+/turf/open/floor/plating/hinged/proc/toggle(mob/living/user)
+	if(opened)
+		return close(user)
+	else
+		return open(user)
+
+/turf/open/floor/plating/hinged/proc/open(mob/living/user)
+	if(opened)
+		return
+	playsound(loc, open_sound, open_sound_volume, 1, -3)
+	opened = TRUE
+	animate_door(FALSE)
+	update_icon()
+	return 1
+
+/turf/open/floor/plating/hinged/proc/close(mob/living/user)
+	if(!opened)
+		return FALSE
+	playsound(loc, close_sound, close_sound_volume, 1, -3)
+	opened = FALSE
+	animate_door(TRUE)
+	update_icon()
+	return TRUE
