@@ -78,9 +78,4 @@
 	if(html) message["html"] = html
 	if(avoid_highlighting) message["avoidHighlighting"] = avoid_highlighting
 	if(allow_linkify) message["allowLinkify"] = allow_linkify
-<<<<<<< HEAD
 	SSchat.queue(target, message, confidential)
-=======
-	SSchat.queue(target, message)
-d
->>>>>>> bbeaad52ae03518426fe0bf3c5d2a5deca8091bc
