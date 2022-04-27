@@ -462,7 +462,7 @@
 		N.hair_color = "000"
 		if(!(HAIR in N.dna.species.species_traits)) //No hair? No problem!
 			N.dna.species.species_traits += HAIR
-		if(N.dna.species.use_skintones)
+		if(SKINTONES in N.dna.species.species_traits)
 			N.skin_tone = "orange"
 		else if(MUTCOLORS in N.dna.species.species_traits) //Aliens with custom colors simply get turned orange
 			N.dna.features["mcolor"] = "f80"
@@ -1622,7 +1622,7 @@
 			var/mob/living/carbon/human/H = M
 			H.hair_color = pick(potential_colors)
 			H.facial_hair_color = pick(potential_colors)
-			H.update_hair()
+			H.update_body() //MonkeStation Edit: Body Update
 
 /datum/reagent/barbers_aid
 	name = "Barber's Aid"

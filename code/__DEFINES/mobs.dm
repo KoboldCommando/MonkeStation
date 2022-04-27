@@ -97,6 +97,7 @@
 #define SPECIES_ASHWALKER		"ashlizard"
 #define SPECIES_OOZELING		"oozeling"
 #define SPECIES_FLY 			"fly"
+#define SPECIES_SIMIAN 			"simian" //monkestation edit
 #define SPECIES_MONKEY			"monkey"
 #define SPECIES_JELLYPERSON		"jelly"
 #define SPECIES_SLIMEPERSON	"slime"
@@ -115,8 +116,9 @@
 #define FLAG_LIZARD			(1<<6)
 #define FLAG_OOZELING		(1<<7)
 #define FLAG_FLY			(1<<8)
-#define FLAG_DEBUG_SPECIES	(1<<9)
-#define FLAG_MONKEY (1<<10)
+#define FLAG_SIMIAN			(1<<9)//monkestation edit
+#define FLAG_DEBUG_SPECIES	(1<<10)
+#define FLAG_MONKEY (1<<11)
 
 #define DIGITIGRADE_NEVER 0
 #define DIGITIGRADE_OPTIONAL 1
@@ -440,3 +442,10 @@
 #define BODY_SIZE_NORMAL 1
 #define BODY_SIZE_SHORT 0.93
 #define BODY_SIZE_TALL 1.03
+
+//monkestation edit begin
+/// Throw modes, defines whether or not to turn off throw mode after
+#define THROW_MODE_DISABLED 0
+#define THROW_MODE_TOGGLE 1
+#define THROW_MODE_HOLD 2
+ //monkestation edit end
