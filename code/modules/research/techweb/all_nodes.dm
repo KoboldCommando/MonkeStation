@@ -10,7 +10,7 @@
 	description = "NT default research technologies."
 	// Default research tech, prevents bricking
 	design_ids = list("basic_matter_bin", "basic_cell", "basic_scanning", "basic_capacitor", "basic_micro_laser", "micro_mani", "desttagger", "handlabel", "larry", "packagewrap",
-	"destructive_analyzer", "circuit_imprinter", "experimentor", "rdconsole", "design_disk", "tech_disk", "rdserver", "rdservercontrol", "mechfab", "paystand",
+	"destructive_analyzer", "circuit_imprinter", "experimentor", "rdconsole", "bepis", "design_disk", "tech_disk", "rdserver", "rdservercontrol", "mechfab", "paystand",
 	"space_heater", "beaker", "large_beaker", "bucket", "xlarge_beaker", "sec_rshot", "sec_beanbag_slug", "sec_bshot", "sec_slug", "sec_Islug", "sec_Brslug", "sec_dart", "sec_38", "sec_38b",
 	"rglass","plasteel","plastitanium","plasmaglass","plasmareinforcedglass","titaniumglass","plastitaniumglass","plumbing_rcd", "antivirus", "glasses_prescription", "engi_plumbing_rcd","oven_tray","toner",
 	"toner_large",)
@@ -1374,6 +1374,18 @@
 	research_costs = list(TECHWEB_POINT_TYPE_GENERIC = 5000)
 	export_price = 2500
 	hidden = TRUE
+
+////////////////////////B.E.P.I.S. Locked Techs////////////////////////
+/datum/techweb_node/light_apps
+	id = "light_apps"
+	display_name = "Illumination Applications"
+	description = "Applications of lighting and vision technology not originally thought to be commercially viable."
+	prereq_ids = list("base")
+	design_ids = list("bright_helmet", "rld_mini")
+	research_costs = list(TECHWEB_POINT_TYPE_GENERIC = 2500)
+	export_price = 2500
+	hidden = TRUE
+	experimental = TRUE
 
 //Helpers for debugging/balancing the techweb in its entirety!
 /proc/total_techweb_exports()
