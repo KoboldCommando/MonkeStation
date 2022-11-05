@@ -112,6 +112,10 @@
 	if (CONFIG_GET(flag/log_attack) && SSticker.current_state != GAME_STATE_FINISHED)
 		WRITE_LOG(GLOB.world_attack_log, "ATTACK: [text]")
 
+/proc/log_econ(text)
+	if (CONFIG_GET(flag/log_econ))
+		WRITE_LOG(GLOB.world_econ_log, "MONEY: [text]")
+
 /proc/log_manifest(ckey, datum/mind/mind,mob/body, latejoin = FALSE)
 	if (CONFIG_GET(flag/log_manifest))
 		WRITE_LOG(GLOB.world_manifest_log, "[ckey] \\ [body.real_name] \\ [mind.assigned_role] \\ [mind.special_role ? mind.special_role : "NONE"] \\ [latejoin ? "LATEJOIN":"ROUNDSTART"]")

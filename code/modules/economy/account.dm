@@ -57,6 +57,7 @@
 /datum/bank_account/proc/transfer_money(datum/bank_account/from, amount)
 	if(from.has_money(amount))
 		adjust_money(amount)
+		log_econ("[amount] credits were transferred from [from.account_holder]'s account to [src.account_holder]")
 		from.adjust_money(-amount)
 		return TRUE
 	return FALSE
@@ -67,6 +68,7 @@
 		money_to_transfer += PAYCHECK_WELFARE
 	if((money_to_transfer + paycheck_bonus) < 0) //Check if the bonus is docking more pay than possible
 		paycheck_bonus -= money_to_transfer //Remove the debt with the payday
+		log_econ("[money_to_transfer] credits were given to [src.account_holder]'s account from income.")
 		money_to_transfer = 0 //No money for you
 	else
 		money_to_transfer += paycheck_bonus
